@@ -150,6 +150,7 @@
     let x = x0;
     while (x < x1) {
       if (opts.street && rnd() < 0.09) { x += 14; continue; }
+      if (opts.canyon && x + 22 > 1076 && x < 1246) { x += 8; continue; }
       const w = rr(opts.wMin || 8, opts.wMax || 20), d = rr(opts.dMin || 14, opts.dMax || 26);
       let h = rr(hMin, hMax); if (opts.tall && rnd() < opts.tall) h *= rr(1.6, 2.6);
       building(x + w / 2, zFront + dir * d / 2, w, d, h, mats, { tank: opts.tank });
@@ -192,10 +193,10 @@
   building(-980, -20, 30, 30, 120, MAT.tower);
   // Brooklyn
   seed = 23;
-  row(SHORE_B + 14, 2000, 26, 1, 8, 22, MAT.brick, { street: true, tank: true });
+  row(SHORE_B + 14, 2000, 26, 1, 8, 22, MAT.brick, { street: true, canyon: true, tank: true });
   row(SHORE_B + 14, 2000, -9, -1, 8, 20, MAT.brick, { street: true, tank: true });
   row(SHORE_B + 14, 2000, -42, -1, 10, 28, [...MAT.brick, ...MAT.stone], { street: true });
-  row(SHORE_B + 14, 2000, 60, 1, 10, 30, [...MAT.brick, ...MAT.stone], { street: true });
+  row(SHORE_B + 14, 2000, 60, 1, 10, 30, [...MAT.brick, ...MAT.stone], { street: true, canyon: true });
   plane(SHORE_B, 2200, 24, 26, 0.05, walk);
   // Midtown across the water
   seed = 31;

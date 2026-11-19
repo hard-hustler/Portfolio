@@ -445,8 +445,8 @@
       billboards.push({ mesh, base: k }); return mesh;
     };
     // towers that carry the screens, on both sides of the track
-    const X0 = 1085, X1 = 1235;
-    for (const [z, dir] of [[-8.6, -1], [25.6, 1]]) for (let x = X0; x < X1; x += 24) {
+    const X0 = 1085, X1 = 1235, ZF = 38; // far wall set back across the street for a wider view
+    for (const [z, dir] of [[-8.6, -1], [ZF + 0.4, 1]]) for (let x = X0; x < X1; x += 24) {
       const h = 52 + ((x / 24) % 3) * 14, d = 22;
       const t = new T.Mesh(new T.BoxGeometry(22, h, d), towerMat); t.position.set(x + 11, h / 2, z + dir * d / 2); scene.add(t);
     }
@@ -455,15 +455,15 @@
     AWARDS.forEach((a, k) => {
       const col = Math.floor(k / 2), row = k % 2, x = X1 - 18 - col * 34;
       if (row === 0) W.AW_COLS.push(x);
-      board(awardBoard(a, k), 21, 13.1, x, row === 0 ? 27.6 : 14.0, 25.2, Math.PI, 1.05);
+      board(awardBoard(a, k), 21, 13.1, x, row === 0 ? 27.6 : 14.0, ZF, Math.PI, 1.05);
     });
     // ads: above the ticker, in the gaps between award billboards, beside them, and on the near wall
     let ak = 0;
-    for (let x = X0 + 10; x < X1 - 4; x += 21) adBoard(18, 9.5, x, 44, 25.2, Math.PI, ak++);
+    for (let x = X0 + 10; x < X1 - 4; x += 21) adBoard(18, 9.5, x, 44, ZF, Math.PI, ak++);
     const strips = [['FIZZLY', '#ff3b4e'], ['NOVA', '#8f7bff'], ['STRIDE', '#ff8a2a'], ['PULSE', '#36f0d0']];
-    W.AW_COLS.forEach((cx, i) => { if (i < W.AW_COLS.length - 1) { for (const yy of [10.6, 19.2, 27.8]) adBoard(11.2, 7.2, cx - 17, yy, 25.2, Math.PI, ak++); } });
-    { const s = strips[0]; board(stripTex(s[0], s[1]), 3.6, 26, W.AW_COLS[0] + 13.5, 20.8, 25.15, Math.PI, 1.0); }
-    { const s = strips[1]; board(stripTex(s[0], s[1]), 3.6, 26, W.AW_COLS[W.AW_COLS.length - 1] - 13.5, 20.8, 25.15, Math.PI, 1.0); }
+    W.AW_COLS.forEach((cx, i) => { if (i < W.AW_COLS.length - 1) { for (const yy of [10.6, 19.2, 27.8]) adBoard(11.2, 7.2, cx - 17, yy, ZF, Math.PI, ak++); } });
+    { const s = strips[0]; board(stripTex(s[0], s[1]), 3.6, 26, W.AW_COLS[0] + 13.5, 20.8, ZF - 0.05, Math.PI, 1.0); }
+    { const s = strips[1]; board(stripTex(s[0], s[1]), 3.6, 26, W.AW_COLS[W.AW_COLS.length - 1] - 13.5, 20.8, ZF - 0.05, Math.PI, 1.0); }
     for (let x = X0 + 10; x < X1; x += 24) { adBoard(16, 9, x, 22, -8.2, 0, ak++); adBoard(10, 14, x + 13, 38, -8.2, 0, ak++); }
     const tick = canvasTex(4096, 128, (g) => {
       g.fillStyle = '#050505'; g.fillRect(0, 0, 4096, 128);
@@ -471,7 +471,7 @@
       for (const a of [...AWARDS, ...AWARDS]) { g.fillStyle = '#ffc531'; g.fillText('●', x, 66); x += 70; g.fillStyle = '#fff'; g.fillText(a.what.toUpperCase(), x, 66); x += g.measureText(a.what.toUpperCase()).width + 70; if (x > 4000) break; }
     });
     tick.wrapS = T.RepeatWrapping;
-    for (const [z, ry] of [[-8.25, 0], [25.25, Math.PI]]) {
+    for (const [z, ry] of [[-8.25, 0], [ZF + 0.05, Math.PI]]) {
       const t = new T.Mesh(new T.PlaneGeometry(X1 - X0, 2.4), new T.MeshBasicMaterial({ map: tick, color: new T.Color(1.1, 1.1, 1.1) }));
       t.position.set((X0 + X1) / 2, z > 0 ? 36.6 : 30, z); t.rotation.y = ry; scene.add(t);
     }
@@ -498,8 +498,8 @@
     (f) => (f < 0.1 ? lerp(HEAD_A, W.SHORE_A, ease.inq(f / 0.1)) : lerp(W.SHORE_A, W.SHORE_B - 4, (f - 0.1) / 0.9)),
     (f) => lerp(W.SHORE_B - 4, 985, f),
     (f) => lerp(985, HEAD_C, ease.out(Math.min(1, f / 0.45))),
-    (f) => lerp(HEAD_C, 1240, ease.out(f)),
-    (f) => lerp(1240, HEAD_B, ease.out(f)),
+    (f) => (f < 0.25 ? lerp(HEAD_C, 1222, ease.out(f / 0.25)) : lerp(1222, 1238, (f - 0.25) / 0.75)),
+    (f) => lerp(1238, HEAD_B, ease.out(f)),
   ];
   const V = (x, y, z) => new T.Vector3(x, y, z);
   const lanU = (f) => clamp((f - 0.11) / 0.66); // lantern walk finishes early so the last one holds before the next stop
@@ -519,7 +519,7 @@
     },
     (f, x) => ({ p: V(x - 28, 13, 7), t: V(x + 140, 95, -160), fov: 56 }),
     (f, x) => ({ p: V(HEAD_C + 26, 13.5 + f * 1.5, 13), t: V(HEAD_C - 120, 12, -4), fov: 54 }),
-    (f) => { const C = W.AW_COLS, n = C.length, u = clamp(f * 1.4 - 0.05) * (n - 1), k = Math.min(n - 2, Math.floor(u)), cx = lerp(C[k], C[k + 1], smooth(0.2, 0.8, u - k)); return { p: V(cx, 12.5, -7), t: V(cx, 17, 25), fov: 62, hf: 52 }; },
+    (f) => { const C = W.AW_COLS, n = C.length, u = clamp(f * 1.4 - 0.05) * (n - 1), k = Math.min(n - 2, Math.floor(u)), cx = lerp(C[k], C[k + 1], smooth(0.2, 0.8, u - k)); return { p: V(cx, 15, -7.4), t: V(cx, 14, 38), fov: 62, hf: 54 }; },
     (f, x) => ({ p: V(x + 40 - f * 6, 30, 36), t: V(x - 32, 8, 0), fov: 50 }),
   ];
   function sceneAt(s) {
