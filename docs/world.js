@@ -470,6 +470,43 @@
   };
 
 
+  const darkCap = new T.MeshStandardMaterial({ color: lin('#1b1b1f'), roughness: 0.8 });
+
+  // Street steam: orange-and-white striped stacks with billowing steam
+  const steamStacks = (W.steam = []);
+  {
+    const stripe = canvasTex(64, 256, (g) => { for (let i = 0; i < 8; i++) { g.fillStyle = i % 2 ? '#f4f1ea' : '#e8641c'; g.fillRect(0, i * 32, 64, 32); } });
+    const stackMat = new T.MeshStandardMaterial({ map: stripe, roughness: 0.6, emissive: lin('#3a1a08'), emissiveIntensity: 0.4 });
+    const puff = canvasTex(128, 128, (g) => {
+      for (let i = 0; i < 26; i++) {
+        const x = 64 + (rnd() - 0.5) * 50, y = 64 + (rnd() - 0.5) * 50, r = rr(18, 40);
+        const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, 'rgba(255,255,255,.22)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+        g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+      }
+    }, false);
+    for (const [x, z] of [[104, 12.5], [58, 15.5], [-20, 11.5], [210, 16], [1040, 14], [1300, 12.5], [1330, 16]]) {
+      const st = new T.Mesh(new T.CylinderGeometry(0.42, 0.48, 2.6, 16, 1, true), stackMat); st.position.set(x, 1.3, z); scene.add(st);
+      const cap = new T.Mesh(new T.CylinderGeometry(0.44, 0.44, 0.08, 16), darkCap); cap.position.set(x, 2.62, z); scene.add(cap);
+      const parts = [];
+      for (let i = 0; i < 22; i++) {
+        const sp = new T.Sprite(new T.SpriteMaterial({ map: puff, color: lin('#d9dce3'), transparent: true, depthWrite: false, opacity: 0 }));
+        sp.material.rotation = rnd() * 6.28; scene.add(sp); parts.push({ sp, off: i / 22, spin: rr(-0.4, 0.4) });
+      }
+      steamStacks.push({ x, z, parts });
+    }
+  }
+  W.updateSteam = (t, day) => {
+    const tint = 0.55 + 0.45 * day;
+    for (const s of steamStacks) for (const p of s.parts) {
+      const a = (t * 0.16 + p.off) % 1;
+      p.sp.position.set(s.x + a * a * 6 + Math.sin(t * 0.7 + p.off * 9) * 0.6, 2.7 + a * 15, s.z + Math.sin(t * 0.5 + p.off * 5) * 0.8);
+      const sc = 1.6 + a * 9; p.sp.scale.set(sc, sc, 1);
+      p.sp.material.opacity = Math.sin(Math.min(1, a * 1.25) * Math.PI) * 0.55;
+      p.sp.material.rotation += p.spin * 0.005;
+      p.sp.material.color.setScalar(tint * 0.85);
+    }
+  };
+
   // Boats on the river: a ferry, tugs, barges and sailboats
   const ships = (W.ships = []);
   {

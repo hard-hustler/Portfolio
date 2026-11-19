@@ -186,3 +186,8 @@ html,body{margin:0;background:#07080d;color:var(--dim);font-family:"Helvetica Ne
 .pj-tip small{display:block;font:600 11px var(--mono);color:#7fc4f2;margin:2px 0 6px}
 .pj-tip ul{margin:0;padding:0 0 0 16px;font:500 12.5px/1.45 var(--sans)}
 .pj-tip li::marker{color:#59b8ff}
+
+/* Bigger tickets on large screens */
+.dock{transform:scale(var(--tks,1));transform-origin:left bottom}
+@media (min-width:900px) and (min-height:720px){.dock{--tks:1.28}}
+@media (min-width:1300px) and (min-height:860px){.dock{--tks:1.42}}

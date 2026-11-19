@@ -393,14 +393,51 @@
       if (a.img) { const im = new Image(); im.onload = () => { draw(tex.ctx, im); tex.needsUpdate = true; }; im.src = a.img; }
       return tex;
     }
-    function decoBoard(k) {
-      const [hi, bg] = PAL[(k + 2) % PAL.length], words = ['NIGHT LINE', 'NEW YORK', 'DATA · AI · BUILD', 'NEXT STOP', 'SHIP IT', 'OPEN LATE'];
-      return canvasTex(512, 512, (g) => {
-        const gr = g.createRadialGradient(256, 256, 20, 256, 256, 360); gr.addColorStop(0, hi); gr.addColorStop(1, bg); g.fillStyle = gr; g.fillRect(0, 0, 512, 512);
-        g.globalAlpha = 0.25; for (let i = 0; i < 8; i++) { g.strokeStyle = '#fff'; g.lineWidth = 6; g.beginPath(); g.arc(256, 256, 40 + i * 40, 0, 7); g.stroke(); } g.globalAlpha = 1;
-        g.fillStyle = '#fff'; g.font = '900 64px Archivo, Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(words[k % words.length], 256, 256);
-      });
+    // Times Square-style ads. Every brand here is invented; the artwork is drawn in code.
+    const AD = {
+      soda(g, w, h) { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#e3122c'); gr.addColorStop(1, '#8a0716'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+        g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = h * 0.03; g.beginPath(); g.moveTo(0, h * 0.72); g.bezierCurveTo(w * 0.3, h * 0.55, w * 0.6, h * 0.95, w, h * 0.7); g.stroke();
+        const bx = w * 0.78, bw = Math.min(w, h) * 0.16; g.fillStyle = 'rgba(30,8,8,.85)'; g.beginPath(); g.moveTo(bx - bw * 0.25, h * 0.12); g.lineTo(bx + bw * 0.25, h * 0.12); g.lineTo(bx + bw * 0.3, h * 0.25); g.quadraticCurveTo(bx + bw * 0.6, h * 0.35, bx + bw * 0.5, h * 0.9); g.lineTo(bx - bw * 0.5, h * 0.9); g.quadraticCurveTo(bx - bw * 0.6, h * 0.35, bx - bw * 0.3, h * 0.25); g.fill();
+        g.fillStyle = '#fff'; g.font = `italic 900 ${h * 0.3}px Archivo, Arial`; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText('Fizzly', w * 0.06, h * 0.38);
+        g.font = `600 ${h * 0.09}px Archivo, Arial`; g.fillText('Open the night.', w * 0.07, h * 0.58); },
+      phone(g, w, h) { const r = g.createRadialGradient(w * 0.7, h * 0.5, 10, w * 0.7, h * 0.5, w * 0.7); r.addColorStop(0, '#5b3cff'); r.addColorStop(1, '#05040e'); g.fillStyle = r; g.fillRect(0, 0, w, h);
+        const pw = h * 0.42, ph = h * 0.8, px = w * 0.62, py = h * 0.1; rrect(g, px, py, pw, ph, pw * 0.14); g.fillStyle = '#111'; g.fill();
+        const sg = g.createLinearGradient(px, py, px + pw, py + ph); sg.addColorStop(0, '#ff7ae0'); sg.addColorStop(0.5, '#6a5cff'); sg.addColorStop(1, '#00d4ff'); rrect(g, px + pw * 0.06, py + pw * 0.06, pw * 0.88, ph - pw * 0.12, pw * 0.1); g.fillStyle = sg; g.fill();
+        g.fillStyle = '#fff'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.font = `900 ${h * 0.22}px Archivo, Arial`; g.fillText('NOVA 9', w * 0.06, h * 0.42);
+        g.font = `500 ${h * 0.075}px Archivo, Arial`; g.fillStyle = '#cfc8ff'; g.fillText('Shot on night mode', w * 0.065, h * 0.6); },
+      sneaker(g, w, h) { g.fillStyle = '#ff6a13'; g.fillRect(0, 0, w, h);
+        const s = Math.min(w, h * 1.6) * 0.5, x = w * 0.52, y = h * 0.64; g.fillStyle = '#fff'; g.beginPath(); g.moveTo(x, y); g.lineTo(x + s, y); g.quadraticCurveTo(x + s * 1.02, y - s * 0.22, x + s * 0.7, y - s * 0.28); g.lineTo(x + s * 0.45, y - s * 0.48); g.lineTo(x + s * 0.12, y - s * 0.42); g.quadraticCurveTo(x - s * 0.02, y - s * 0.2, x, y); g.fill();
+        g.fillStyle = '#111'; g.fillRect(x, y - s * 0.04, s, s * 0.07); g.strokeStyle = '#ff6a13'; g.lineWidth = s * 0.04; g.beginPath(); g.moveTo(x + s * 0.2, y - s * 0.15); g.quadraticCurveTo(x + s * 0.5, y - s * 0.05, x + s * 0.8, y - s * 0.25); g.stroke();
+        g.fillStyle = '#111'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.font = `900 italic ${h * 0.24}px Archivo, Arial`; g.fillText('STRIDE', w * 0.05, h * 0.3); g.font = `700 ${h * 0.08}px Archivo, Arial`; g.fillText('RUN THE CITY', w * 0.06, h * 0.86); },
+      show(g, w, h) { g.fillStyle = '#0b0710'; g.fillRect(0, 0, w, h); const r = g.createRadialGradient(w / 2, 0, 5, w / 2, h * 0.3, h * 0.9); r.addColorStop(0, 'rgba(255,214,120,.75)'); r.addColorStop(1, 'rgba(255,214,120,0)'); g.fillStyle = r; g.fillRect(0, 0, w, h);
+        g.fillStyle = '#ffd36b'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `900 ${Math.min(w * 0.13, h * 0.17)}px Archivo, Arial`; g.fillText('THE LAST', w / 2, h * 0.4); g.fillText('STOP', w / 2, h * 0.58);
+        g.fillStyle = '#fff'; g.font = `600 ${h * 0.06}px Archivo, Arial`; g.fillText('A NEW MUSICAL · NOW ON BROADWAY', w / 2, h * 0.76); g.fillStyle = '#ffd36b'; g.fillText('★★★★★', w / 2, h * 0.88); },
+      stream(g, w, h) { const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#16050a'); gr.addColorStop(1, '#5e0a1e'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+        g.fillStyle = 'rgba(0,0,0,.5)'; g.beginPath(); g.arc(w * 0.72, h * 0.45, h * 0.32, 0, 7); g.fill(); g.fillStyle = '#ff3b5c'; g.beginPath(); g.moveTo(w * 0.68, h * 0.3); g.lineTo(w * 0.8, h * 0.45); g.lineTo(w * 0.68, h * 0.6); g.fill();
+        g.fillStyle = '#fff'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.font = `900 ${h * 0.18}px Archivo, Arial`; g.fillText('NIGHT', w * 0.06, h * 0.35); g.fillText('SHIFT', w * 0.06, h * 0.55);
+        g.font = `600 ${h * 0.07}px Archivo, Arial`; g.fillStyle = '#ffb3c0'; g.fillText('New season · Streaming Friday on Loopr', w * 0.065, h * 0.78); },
+      audio(g, w, h) { g.fillStyle = '#0a2b2f'; g.fillRect(0, 0, w, h); const c = w * 0.72, r = h * 0.3;
+        g.strokeStyle = '#36f0d0'; g.lineWidth = h * 0.06; g.beginPath(); g.arc(c, h * 0.55, r, Math.PI, 0); g.stroke(); g.fillStyle = '#36f0d0'; rrect(g, c - r - h * 0.08, h * 0.5, h * 0.16, h * 0.3, h * 0.05); g.fill(); rrect(g, c + r - h * 0.08, h * 0.5, h * 0.16, h * 0.3, h * 0.05); g.fill();
+        g.fillStyle = '#fff'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.font = `900 ${h * 0.2}px Archivo, Arial`; g.fillText('PULSE', w * 0.06, h * 0.4); g.font = `600 ${h * 0.08}px Archivo, Arial`; g.fillStyle = '#9ff7e6'; g.fillText('Hear every block.', w * 0.065, h * 0.6); },
+      watch(g, w, h) { g.fillStyle = '#080706'; g.fillRect(0, 0, w, h); const c = w * 0.7, r = h * 0.3;
+        g.strokeStyle = '#d6b36a'; g.lineWidth = h * 0.035; g.beginPath(); g.arc(c, h / 2, r, 0, 7); g.stroke(); g.lineWidth = h * 0.015; for (let i = 0; i < 12; i++) { const a = i / 12 * 6.283; g.beginPath(); g.moveTo(c + Math.cos(a) * r * 0.8, h / 2 + Math.sin(a) * r * 0.8); g.lineTo(c + Math.cos(a) * r * 0.92, h / 2 + Math.sin(a) * r * 0.92); g.stroke(); }
+        g.lineWidth = h * 0.02; g.beginPath(); g.moveTo(c, h / 2); g.lineTo(c + r * 0.5, h / 2 - r * 0.3); g.moveTo(c, h / 2); g.lineTo(c - r * 0.1, h / 2 - r * 0.7); g.stroke();
+        g.fillStyle = '#d6b36a'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.font = `400 ${h * 0.2}px Georgia, serif`; g.fillText('AURUM', w * 0.06, h * 0.45); g.font = `400 ${h * 0.07}px Georgia, serif`; g.fillText('GENEVA · SINCE 1921', w * 0.065, h * 0.62); },
+      car(g, w, h) { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#1d2733'); gr.addColorStop(1, '#05070a'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+        const x = w * 0.45, y = h * 0.7, s = Math.min(w * 0.5, h * 1.2); g.fillStyle = '#c9d2dc'; g.beginPath(); g.moveTo(x, y); g.lineTo(x + s, y); g.quadraticCurveTo(x + s * 1.02, y - s * 0.12, x + s * 0.85, y - s * 0.16); g.quadraticCurveTo(x + s * 0.6, y - s * 0.32, x + s * 0.35, y - s * 0.3); g.quadraticCurveTo(x + s * 0.15, y - s * 0.17, x, y - s * 0.12); g.closePath(); g.fill();
+        g.fillStyle = '#05070a'; for (const wx of [0.22, 0.78]) { g.beginPath(); g.arc(x + s * wx, y, s * 0.08, 0, 7); g.fill(); } g.fillStyle = '#7fd7ff'; g.fillRect(x + s * 0.9, y - s * 0.1, s * 0.08, s * 0.02);
+        g.fillStyle = '#fff'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.font = `200 ${h * 0.18}px Archivo, Arial`; g.fillText('VELOCE', w * 0.05, h * 0.32); g.font = `700 ${h * 0.07}px Archivo, Arial`; g.fillStyle = '#7fd7ff'; g.fillText('ALL-ELECTRIC · 520 MI', w * 0.055, h * 0.48); },
+    };
+    const AD_KEYS = Object.keys(AD);
+    function rrect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+    function adTex(key, wm, hm) { const W2 = Math.round(Math.min(1024, wm * 64)), H2 = Math.round(W2 * hm / wm); return canvasTex(W2, H2, (g) => AD[key](g, W2, H2)); }
+    function stripTex(word, color, hm) { const H2 = 1024, W2 = Math.max(64, Math.round(H2 * 0.18)); return canvasTex(W2, H2, (g) => { g.fillStyle = '#050505'; g.fillRect(0, 0, W2, H2); g.fillStyle = color; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `900 ${W2 * 0.7}px Archivo, Arial`; [...word].forEach((ch, i) => g.fillText(ch, W2 / 2, (i + 0.5) * H2 / word.length)); }); }
+    const swaps = [];
+    function adBoard(w, h, x, y, z, ry, k) {
+      const t1 = adTex(AD_KEYS[k % AD_KEYS.length], w, h), t2 = adTex(AD_KEYS[(k + 3) % AD_KEYS.length], w, h);
+      const mesh = board(t1, w, h, x, y, z, ry, 0.95); swaps.push({ mesh, t: [t1, t2], off: k * 1.7 });
     }
+    W.adSwaps = swaps;
     const board = (tex, w, h, x, y, z, ry, k = 1) => {
       const mt = new T.MeshBasicMaterial({ map: tex, color: new T.Color(k, k, k), toneMapped: false });
       const mesh = new T.Mesh(new T.PlaneGeometry(w, h), mt); mesh.position.set(x, y, z); mesh.rotation.y = ry; scene.add(mesh);
@@ -416,17 +453,18 @@
     // all awards on the far wall (facing the track), 4 columns x 2 rows
     W.AW_COLS = [];
     AWARDS.forEach((a, k) => {
-      const col = Math.floor(k / 2), row = k % 2, x = X1 - 22 - col * 26;
+      const col = Math.floor(k / 2), row = k % 2, x = X1 - 18 - col * 34;
       if (row === 0) W.AW_COLS.push(x);
       board(awardBoard(a, k), 21, 13.1, x, row === 0 ? 27.6 : 14.0, 25.2, Math.PI, 1.05);
     });
-    // decorative screens on the near wall and above the ticker
-    let dk = 0;
-    for (let x = X0 + 4; x < X1; x += 26) {
-      board(decoBoard(dk++), 7, 7, x, 36 + (dk % 2) * 6, -8.2, 0, 0.9);
-      board(decoBoard(dk++), 5, 9, x + 15, 8.5 + (dk % 3), -8.2, 0, 0.8);
-    }
-    for (let x = X0 + 8; x < X1; x += 18) board(decoBoard(dk++), 6, 5, x, 41, 25.2, Math.PI, 0.85);
+    // ads: above the ticker, in the gaps between award billboards, beside them, and on the near wall
+    let ak = 0;
+    for (let x = X0 + 10; x < X1 - 4; x += 21) adBoard(18, 9.5, x, 44, 25.2, Math.PI, ak++);
+    const strips = [['FIZZLY', '#ff3b4e'], ['NOVA', '#8f7bff'], ['STRIDE', '#ff8a2a'], ['PULSE', '#36f0d0']];
+    W.AW_COLS.forEach((cx, i) => { if (i < W.AW_COLS.length - 1) { for (const yy of [10.6, 19.2, 27.8]) adBoard(11.2, 7.2, cx - 17, yy, 25.2, Math.PI, ak++); } });
+    { const s = strips[0]; board(stripTex(s[0], s[1]), 3.6, 26, W.AW_COLS[0] + 13.5, 20.8, 25.15, Math.PI, 1.0); }
+    { const s = strips[1]; board(stripTex(s[0], s[1]), 3.6, 26, W.AW_COLS[W.AW_COLS.length - 1] - 13.5, 20.8, 25.15, Math.PI, 1.0); }
+    for (let x = X0 + 10; x < X1; x += 24) { adBoard(16, 9, x, 22, -8.2, 0, ak++); adBoard(10, 14, x + 13, 38, -8.2, 0, ak++); }
     const tick = canvasTex(4096, 128, (g) => {
       g.fillStyle = '#050505'; g.fillRect(0, 0, 4096, 128);
       g.font = '800 72px Archivo, Arial'; g.textBaseline = 'middle'; let x = 30;
@@ -628,6 +666,7 @@
     show(L.aw, smooth(0.4, 1, pres[5]));
     if (W.ticker) W.ticker.offset.x = (time * 0.03) % 1;
     billboards.forEach((b, k) => b.mesh.material.color.setScalar(b.base * (0.92 + 0.08 * Math.sin(time * 2.2 + k * 1.7))));
+    (W.adSwaps || []).forEach((s) => { const want = s.t[Math.floor((time + s.off) / 5) % 2]; if (s.mesh.material.map !== want) { s.mesh.material.map = want; s.mesh.material.needsUpdate = true; } });
     // line map
     const here = pres[i + 1] > 0.5 ? i + 1 : i;
     lm.forEach((li, k) => { li.classList.toggle('past', k < here); li.classList.toggle('here', k === here); });
@@ -638,6 +677,7 @@
   // ---------- Loop ----------
   let sm = scrollY / innerHeight, last = performance.now(), lastArt = 0, first = true;
   W.train = train; W.camera = camera;
+  if (location.hostname === '127.0.0.1') window.__shot = (s, q = 0.75) => { scrollTo(0, s * innerHeight); sm = s; last = performance.now(); step(performance.now()); return canvas.toDataURL('image/jpeg', q); };
   function frame(now) { step(now); requestAnimationFrame(frame); }
   function step(now) {
     const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now;
@@ -672,7 +712,7 @@
     W.updateTraffic(time);
     (W.towerLights || []).forEach((l) => (l.material.opacity = Math.sin(time * 3) > 0 ? 1 : 0.15));
     W.sky.position.copy(camera.position); W.stars.position.copy(camera.position);
-    const day = 1 - smooth(6.4, 8.5, sm); W.setDay(day, camera.position, 2.86 * smooth(4.9, 6.1, sm), time); W.updateShips(time);
+    const day = 1 - smooth(6.4, 8.5, sm); W.setDay(day, camera.position, 2.86 * smooth(4.9, 6.1, sm), time); W.updateShips(time); W.updateSteam(time, day);
     sideMats.forEach((sm2) => (sm2.emissiveIntensity = lerp(0.95, 0.45, day)));
     bloom.threshold = lerp(0.88, 0.97, day); bloom.strength = lerp(0.62, 0.4, day);
     ui(st, time);
