@@ -189,5 +189,5 @@ html,body{margin:0;background:#07080d;color:var(--dim);font-family:"Helvetica Ne
 
 /* Bigger tickets on large screens */
 .dock{transform:scale(var(--tks,1));transform-origin:left bottom}
-@media (min-width:900px) and (min-height:720px){.dock{--tks:1.28}}
-@media (min-width:1300px) and (min-height:860px){.dock{--tks:1.42}}
+@media (min-width:900px) and (min-height:720px){.dock{--tks:1.12}}
+@media (min-width:1300px) and (min-height:860px){.dock{--tks:1.18}}
