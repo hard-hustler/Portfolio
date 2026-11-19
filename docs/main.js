@@ -677,6 +677,18 @@
   // ---------- Loop ----------
   let sm = scrollY / innerHeight, last = performance.now(), lastArt = 0, first = true;
   W.train = train; W.camera = camera;
+  if (location.hostname === '127.0.0.1') window.__render = (s, w, h) => {
+    const W0 = innerWidth, H0 = innerHeight;
+    renderer.setPixelRatio(1); renderer.setSize(w, h, false); composer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+    const fakeIW = Object.getOwnPropertyDescriptor(window, 'innerWidth'), fakeIH = Object.getOwnPropertyDescriptor(window, 'innerHeight');
+    Object.defineProperty(window, 'innerWidth', { configurable: true, get: () => w }); Object.defineProperty(window, 'innerHeight', { configurable: true, get: () => h });
+    sm = s; last = performance.now(); step(performance.now()); step(performance.now());
+    const url = canvas.toDataURL('image/jpeg', 0.95);
+    if (fakeIW) Object.defineProperty(window, 'innerWidth', fakeIW); else delete window.innerWidth;
+    if (fakeIH) Object.defineProperty(window, 'innerHeight', fakeIH); else delete window.innerHeight;
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5)); resize();
+    return url;
+  };
   if (location.hostname === '127.0.0.1') window.__shot = (s, q = 0.75) => { scrollTo(0, s * innerHeight); sm = s; last = performance.now(); step(performance.now()); return canvas.toDataURL('image/jpeg', q); };
   function frame(now) { step(now); requestAnimationFrame(frame); }
   function step(now) {
